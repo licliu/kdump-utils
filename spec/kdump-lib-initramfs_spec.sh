@@ -38,4 +38,38 @@ Describe 'kdump-lib-initramfs'
 
 	End
 
+	Describe 'Test get_mntpoint_from_target'
+		findmnt() {
+			if [[ "$5" == 'eng.redhat.com:/srv/[nfs]' ]]; then
+				printf 'SOURCE="%s" TARGET="/mnt"\n' "$5"
+			elif [[ "$5" == '[2620:52:0:a1:217:38ff:fe01:131]:/srv/[nfs]' ]]; then
+				printf 'SOURCE="%s" TARGET="/mnt"\n' "$5"
+			elif [[ "$5" == '/dev/mapper/rhel[disk]' ]]; then
+				printf 'SOURCE="%s" TARGET="/"\n' "$5"
+			elif [[ "$5" == '/dev/vda4' ]]; then
+				printf 'SOURCE="%s[/ostree/deploy/default/var]" TARGET="/var"\nSOURCE="%s" TARGET="/sysroot"\n' "$5" "$5"
+			fi
+		}
+
+		Context 'Given different cases'
+			# Test the following cases:
+			#  - IPv6 NFS target
+			#  - IPv6 NFS target also contain '[' in the export
+			#  - local dumping target that has '[' in the name
+			#  - has bind mint
+			Parameters
+				'eng.redhat.com:/srv/[nfs]' '/mnt'
+				'[2620:52:0:a1:217:38ff:fe01:131]:/srv/[nfs]' '/mnt'
+				'/dev/mapper/rhel[disk]' '/'
+				'/dev/vda4' '/sysroot'
+			End
+
+			It 'should handle all cases correctly'
+				When call get_mntpoint_from_target "$1"
+				The output should equal "$2"
+			End
+		End
+
+	End
+
 End

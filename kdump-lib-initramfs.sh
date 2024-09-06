@@ -110,7 +110,7 @@ get_mntpoint_from_target()
 		_target="${_target#*TARGET=\"}"
 		_target="${_target%%\"}"
 
-		if ! expr "X$_source" : 'X.*\[' > /dev/null; then
+		if ! expr "X$_source" : 'X.*\[/.*]$' > /dev/null; then
 			echo "$_target"
 			break
 		fi
